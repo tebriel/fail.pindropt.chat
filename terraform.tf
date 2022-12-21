@@ -11,7 +11,7 @@ terraform {
   cloud {
     organization = "tebriel"
     workspaces {
-      name = "chat.pindropt.fail"
+      name = "chat-pindropt-fail"
     }
   }
 }
