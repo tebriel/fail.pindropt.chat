@@ -45,6 +45,11 @@ resource "azurerm_virtual_machine" "zulip" {
   # Uncomment this line to delete the data disks automatically when deleting the VM
   # delete_data_disks_on_termination = true
 
+  boot_diagnostics {
+    enabled     = true
+    storage_uri = ""
+  }
+
   storage_image_reference {
     publisher = "canonical"
     offer     = "0001-com-ubuntu-server-focal"
