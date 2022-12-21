@@ -71,3 +71,53 @@ resource "azurerm_virtual_machine" "zulip" {
     disable_password_authentication = true
   }
 }
+
+resource "azurerm_managed_disk" "zulip-data" {
+  name                 = "zulip_data"
+  location             = azurerm_resource_group.chat-pindropt-fail.location
+  resource_group_name  = azurerm_resource_group.chat-pindropt-fail.name
+  storage_account_type = "Premium_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "16"
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "zulip-data" {
+  managed_disk_id    = azurerm_managed_disk.zulip-data.id
+  virtual_machine_id = azurerm_virtual_machine.zulip.id
+  lun                = "0"
+  caching            = "None"
+}
+
+resource "azurerm_network_security_group" "zulip-nsg" {
+  name                = "zulip-nsg"
+  location            = azurerm_resource_group.chat-pindropt-fail.location
+  resource_group_name = azurerm_resource_group.chat-pindropt-fail.name
+}
+
+resource "azurerm_network_security_rule" "ssh" {
+  name                        = "SSH"
+  resource_group_name         = azurerm_resource_group.chat-pindropt-fail.name
+  network_security_group_name = azurerm_network_security_group.zulip-nsg.name
+  priority                    = 300
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+}
+
+resource "azurerm_network_security_rule" "https" {
+  name                        = "HTTPS"
+  resource_group_name         = azurerm_resource_group.chat-pindropt-fail.name
+  network_security_group_name = azurerm_network_security_group.zulip-nsg.name
+  priority                    = 320
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "443"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+}
